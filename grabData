@@ -1,0 +1,69 @@
+#!/usr/bin/env python
+# this pulls data for selected securities
+
+def importData(securities,start,end):
+    import pandas_datareader.data as web
+
+    all_data = {ticker: web.get_data_yahoo(ticker,start,end)
+            for ticker in securities}
+    
+    return all_data
+
+def checkPreviousData():
+    from glob import glob as g
+
+def writeOut(all_data):
+    pickleFile = open('savedData.pkl', 'wb')
+    pickle.dump(all_data, pickleFile)
+    pickleFile.close()
+
+def readInSavedData():
+    all_data = pickle.load(open('savedData.pkl','rb'))
+    return all_data
+
+def getQuote(security):
+    amzn = web.get_quote_yahoo('AMZN')
+
+def getPrices(all_data):
+    prices = pd.DataFrame({ticker: data['Adj Close']
+        for ticker, data in all_data.items()})
+    return prices
+
+def getVolumes(all_data):
+    volumes = pd.DataFrame({ticker: data['Volume']
+        for ticker, data in all_data.items()})
+    return volumes
+
+def getDescription(data):
+    return data.describe()
+
+def getPriceChange(prices):
+    return prices.pct_change()
+
+if __name__ == '__main__':
+    import pandas as pd
+    import datetime
+    import pickle
+
+    start = datetime.datetime(2013, 1, 1)
+    end = datetime.datetime(2013, 1, 27)
+
+    securities = ['QQQ','AAPL','GOOG','FB','AMZN']
+    #all_data = importData(securities,start,end)
+    all_data = readInSavedData()
+    #writeOut(all_data)
+
+    prices = getPrices(all_data)
+    volumes = getVolumes(all_data)
+    change = getPriceChange(prices)
+
+
+    f = lambda x: x.max()
+    maxgain = change.apply(f, axis='columns')
+    change['Max Gain'] = maxgain
+
+
+    print(change)
+
+
+
